@@ -1,3 +1,7 @@
+#  ignore everything except .java files
+*
+!*.java
+
 # Compiled class file
 *.class
 
@@ -19,11 +23,6 @@
 *.tar.gz
 *.rar
 
-#  ignore everything
-*
-
-# Except for .java files
-!*.java
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
