@@ -1,6 +1,5 @@
-#  ignore everything except .java files
-*
-!*.java
+# ignore txt files
+*.txt
 
 # Compiled class file
 *.class
