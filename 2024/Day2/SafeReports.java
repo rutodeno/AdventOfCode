@@ -2,9 +2,8 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Scanner;
 
-public class UnsafeReports {
+public class SafeReports {
 
     public static void main(String args[]) {
 
@@ -28,36 +27,37 @@ public class UnsafeReports {
             System.out.println("Unable to read "+ fileName);
         }
 
-
         int numUnsafeReports = 0;
+
+        for (int i = 0; i < report.size(); i++) {
+            boolean result = isSafe(report.get(i));
+            if (result) numUnsafeReports++;
+        }
+
+        System.out.println("numSafeFiles: "+numUnsafeReports);
+    }
+
+    private static boolean isSafe(ArrayList<Integer> line) {
+
         int maxThreshold = 3;
         int minThreshold = 1;
 
-        for (int i = 0; i < report.size(); i++) {
-            boolean previousValue = false;
+        if (line.size() < 2) return true; // edge case where list has only 2 element
 
-            for (int j = 1; j < report.get(i).size(); j++) {
-                boolean isMonotonicallyIncreasing = false;
-                if (report.get(i).get(j-1) > report.get(i).get(j))
-                    isMonotonicallyIncreasing = true;
+        boolean previousPairSign = (line.get(0) > line.get(1));
 
-                int difference = Math.abs(report.get(i).get(j-1) - report.get(i).get(j));
+        for (int j = 1; j < line.size(); j++) {
+    
+            int difference = Math.abs(line.get(j-1) - line.get(j));
+            
+            boolean pairSign = false;            
+            if (line.get(j-1) > line.get(j)) pairSign = true;
 
-                if (difference < minThreshold || difference > maxThreshold || ((j > 1) && isMonotonicallyIncreasing != previousValue)) {
-                    numUnsafeReports++;
-                    System.out.println(report.get(i));
-                    break;
-                }
+            if (difference < minThreshold || difference > maxThreshold  ||  pairSign != previousPairSign)  return false;
 
-                previousValue = isMonotonicallyIncreasing;
-            }
+            previousPairSign = pairSign;
         }
 
-        System.out.println((report.size() +" "+numUnsafeReports));
-
+        return true;
     }
-
-
-    
-
 }
