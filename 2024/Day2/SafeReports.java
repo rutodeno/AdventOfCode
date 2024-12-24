@@ -35,6 +35,7 @@ public class SafeReports {
             if (result) numSafeReports++;
             else {
                 // we go through the unsafe list and remove each element and test whether it's safe;
+                
                 for (int l = 0; l < report.get(i).size(); l++) {
 
                     ArrayList<Integer> copyReport = new ArrayList<>();
