@@ -27,14 +27,32 @@ public class SafeReports {
             System.out.println("Unable to read "+ fileName);
         }
 
-        int numUnsafeReports = 0;
+        int numSafeReports = 0;
+        int numTolerantSafeReport = 0;
 
         for (int i = 0; i < report.size(); i++) {
             boolean result = isSafe(report.get(i));
-            if (result) numUnsafeReports++;
+            if (result) numSafeReports++;
+            else {
+                // we go through the unsafe list and remove each element and test whether it's safe;
+                for (int l = 0; l < report.get(i).size(); l++) {
+
+                    ArrayList<Integer> copyReport = new ArrayList<>();
+                    for (int j = 0; j < report.get(i).size(); j++) {
+                        if (j != l) copyReport.add(report.get(i).get(j));
+                    }
+
+                    if (isSafe(copyReport)) {
+                        numTolerantSafeReport++;
+                        break;
+                    }
+                }
+            }
         }
 
-        System.out.println("numSafeFiles: "+numUnsafeReports);
+        System.out.println("numSafeFiles: " +numSafeReports);
+        System.out.println("tolerant safe: " +numTolerantSafeReport);
+        System.out.println("safe + tolerantsafe: " + (numSafeReports + numTolerantSafeReport));
     }
 
     private static boolean isSafe(ArrayList<Integer> line) {
