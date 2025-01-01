@@ -2,21 +2,19 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 
 public class CeresSearch {
 
     private char[][] data;
-    private final static int N  = 0;
-    private final static int NE = 1;
-    private final static int E  = 2;
-    private final static int SE = 3;
-    private final static int S  = 4;
-    private final static int SW = 5;
-    private final static int W  = 6;
-    private final static int NW = 7;
+    private static final int N  = 0;
+    private static final int NE = 1;
+    private static final int E  = 2;
+    private static final int SE = 3;
+    private static final int S  = 4;
+    private static final int SW = 5;
+    private static final int W  = 6;
+    private static final int NW = 7;
 
 
     public CeresSearch(String fileName) {
@@ -58,12 +56,16 @@ public class CeresSearch {
 
         int numXMAS = 0;
 
-        for (int i = 0; i < data.length; i++) {
-            for (int j = 0; j < data[i].length; j++) {
-               List<int[]> pList = possibleIndex(data, i, j);
+        for (int row = 0; row < data.length; row++) {
+            for (int col = 0; col < data[row].length; col++) {
+               List<int[]> pList = possibleIndex(data, row, col);
                
                for (int[] indicies : pList) {
-                    if (extractString(indicies).equals("XMAS")) numXMAS++;
+                    String s = extractString(indicies);
+                    if (s.equals("XMAS")) {
+                        // System.out.println(s);
+                        numXMAS++;
+                    }
                }
 
             }
@@ -81,14 +83,14 @@ public class CeresSearch {
 
         int offset = charOffset(data[x][y]);
         int[][] directions = {
-            {0, -offset, 0, -offset + 3, N},                   // North
-            {-offset, -offset, -offset + 3, -offset + 3, NE},  // North East
-            {-offset, 0, -offset + 3, 0, E},                   // East
-            {-offset, -offset, -offset + 3, -offset - 3, SE},  // South East
-            {0, -offset, 0, -offset - 3, S},                   // South
-            {-offset, -offset, -offset - 3, -offset - 3, SW},  // South West
-            {-offset, 0, -offset - 3, 0, W},                   // West
-            {-offset, -offset, -offset - 3, -offset + 3, NW}   // North West            
+            {0, 0, 0, 3, N},    // North
+            {0, 0, 3, 3, NE},   // North East
+            {0, 0, 3, 0, E},    // East
+            {0, 0, 3, -3, SE},  // South East
+            {0, 0, 0 ,-3, S},   // South
+            {0, 0, -3, -3, SW}, // South West
+            {0, 0, -3, 0, W},   // West
+            {0, 0, -3, 3, NW}   // North West            
         };
 
         for (int[] dir : directions) {
@@ -99,8 +101,15 @@ public class CeresSearch {
             int y2 = y + dir[3];
             int position = dir[4];
 
-            if (isValidPoint(x1, y1) && isValidPoint(x2, y2)) possibleDirections.add(new int[] {x1, y1, x2, y2, position});
+            // System.out.printf("(%d, %d) (%d, %d) %d \n", x1, y1, x2, y2, position);
+
+            if (isValidPoint(x1, y1) && isValidPoint(x2, y2)) {
+                int[] indexArray = new int[] {x1, y1, x2, y2, position};
+                possibleDirections.add(indexArray);
+                // System.out.printf("(%d, %d) (%d, %d) %d %s\n", x1, y1, x2, y2, position, extractString(indexArray));
+            }
         }
+        // System.out.println("");
 
         return possibleDirections;
     }
@@ -130,7 +139,7 @@ public class CeresSearch {
                     xmasString.append(data[x][y1]);
                 break;
             case SE:
-                for (int y = y1, x = x1; y <= y2 ; x++, y--)
+                for (int y = y1, x = x1; y >= y2 ; x++, y--)
                     xmasString.append(data[x][y]);            
                 break;
             case S:
@@ -157,7 +166,43 @@ public class CeresSearch {
     }
 
     private boolean isValidPoint(int x, int y) {
-        return x >= 0 && x <= data.length-1 && y >= 0 && y <= data.length-1;
+        return (x >= 0 && x <= data.length-1) && (y >= 0 && y <= data.length-1);
+    }
+
+    public int findDiagonalXMAS() {
+        int numDiagonals = 0;
+
+        for (int row = 0; row < data.length; row++) {
+            for (int col = 0; col < data[row].length; col++) {
+                // first diagonal
+                // (row, col) --> (x2, y2) position SE
+                int x2 = row + 2;
+                int y2 = col - 2;
+
+                // second diagonal
+                // (x1,y1) --> (x3, y3) position SW
+                int x1 = row + 2;
+                int y1 = col;
+
+                int x3 = row;
+                int y3 = col - 2;
+
+
+
+                if (isValidPoint(x3, y3) && isValidPoint(x2, y2) && isValidPoint(x1, y1)) {
+
+                    String firstDiagonal = extractString(new int[]{row, col, x2, y2, SE});
+                    String secondDiagonal = extractString(new int[]{x1, y1, x3, y3, SW});
+
+                    if ((firstDiagonal.equals("MAS") || firstDiagonal.equals("SAM")) && (secondDiagonal.equals("MAS") || secondDiagonal.equals("SAM"))) {
+                        numDiagonals++;
+                        // System.out.println(firstDiagonal + " " + secondDiagonal);
+                    }
+                }
+            }
+        }
+
+        return numDiagonals;
     }
 
     private int charOffset(char c) {
@@ -172,5 +217,6 @@ public class CeresSearch {
         String fileName = args[0];  
         CeresSearch findXMAS = new CeresSearch(fileName);
         System.out.println("Num XMAS: "+findXMAS.findNumberOfXMAS());
+        System.out.println("Num diagonal: "+findXMAS.findDiagonalXMAS());
     }
 }
